@@ -10,7 +10,7 @@ from model_depth import ParsingNet
 from nltk import pos_tag, word_tokenize
 
 os.environ["CUDA_VISIBLE_DEVICES"] = str(config.global_gpu_id)
-
+min_span_len = 5
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -66,7 +66,7 @@ def decide_segment(cur_segment, in_idx, in_lines):
     if in_lines[in_idx].startswith("`s ") or in_lines[in_idx].startswith("\'s ") or len(in_lines[in_idx]) < 3:
         return False
 
-    if tmp_next_seg_len < 7 and in_lines[in_idx].endswith(". ") and (not cur_segment.endswith(". ")):
+    if tmp_next_seg_len < min_span_len and in_lines[in_idx].endswith(". ") and (not cur_segment.endswith(". ")):
         return False
 
     if tmp_merged.endswith(": ") and len(tmp_merged) > 4 and tmp_merged.strip()[-3].isdigit() and in_idx + 1 < len(in_lines) and in_lines[in_idx + 1].strip()[0].isdigit():
@@ -82,7 +82,7 @@ def decide_segment(cur_segment, in_idx, in_lines):
     if tmp_merged.endswith(". "):
         return True
 
-    if tmp_merged_len < 8:
+    if tmp_merged_len < min_span_len + 1:
         return False
 
     """ you can comment this POS tagging step to higher processing speed, if needed """
@@ -104,7 +104,7 @@ def EDU_level_merge_segments(input_lines):
     while seg_idx < len(input_lines):
         current_seg = re.sub("\s+", " ", current_seg)
 
-        if len(input_lines[seg_idx].strip().split()) < 7 and input_lines[seg_idx].endswith(". ") and len(new_lines) > 1 and (not new_lines[-1].endswith(". ")):
+        if len(input_lines[seg_idx].strip().split()) < min_span_len and input_lines[seg_idx].endswith(". ") and len(new_lines) > 1 and (not new_lines[-1].endswith(". ")):
             new_lines[-1] = new_lines[-1] + input_lines[seg_idx]
 
         else:
