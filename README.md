@@ -1,6 +1,7 @@
 ## Introduction
 One implementation of the paper `Exploiting Discourse-Level Segmentation for Extractive Summarization`, and the EDU level segmentation part is updated by using our new [DMRST_Parser](https://github.com/seq-to-mind/DMRST_Parser).
 
+* Please note that the `SegMerge_Infer.py` is only for building the EDU segments, not the summarization part.
 * Users can apply it to process the input text, and obtain the EDU segments, as well as the merged segments for extractive summarization. <br>
 * This repo and the pre-trained model are only for research use. Please cite the papers if they are helpful. <br>
 
