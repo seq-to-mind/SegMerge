@@ -1,4 +1,4 @@
-import os
+ import os
 import torch
 import numpy as np
 import argparse
@@ -11,6 +11,7 @@ from nltk import pos_tag, word_tokenize
 
 os.environ["CUDA_VISIBLE_DEVICES"] = str(config.global_gpu_id)
 min_span_len = 5
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -99,21 +100,23 @@ def EDU_level_merge_segments(input_lines):
 
     new_lines = []
     seg_idx = 0
-    current_seg = ""
+    current_merged_span = ""
 
     while seg_idx < len(input_lines):
-        current_seg = re.sub("\s+", " ", current_seg)
+        current_merged_span = re.sub("\s+", " ", current_merged_span)
+        current_one_EDU = input_lines[seg_idx]
 
-        if len(input_lines[seg_idx].strip().split()) < min_span_len and input_lines[seg_idx].endswith(". ") and len(new_lines) > 1 and (not new_lines[-1].endswith(". ")):
-            new_lines[-1] = new_lines[-1] + input_lines[seg_idx]
+        if len(current_one_EDU.strip().split()) < min_span_len and current_one_EDU.endswith(". ") and len(new_lines) > 1 and (not (new_lines[-1] + current_merged_span).endswith(". ")):
+            new_lines[-1] = new_lines[-1] + current_merged_span + current_one_EDU
+            current_merged_span = ""
 
         else:
-            if decide_segment(current_seg, seg_idx, input_lines) is False:
-                current_seg = current_seg + input_lines[seg_idx]
+            if decide_segment(current_merged_span, seg_idx, input_lines) is False:
+                current_merged_span = current_merged_span + current_one_EDU
 
             else:
-                new_lines.append(current_seg + input_lines[seg_idx])
-                current_seg = ""
+                new_lines.append(current_merged_span + current_one_EDU)
+                current_merged_span = ""
 
         seg_idx += 1
 
@@ -159,3 +162,4 @@ if __name__ == '__main__':
         merged_EDU_list = EDU_level_merge_segments(tmp_EDU_list)
         print(merged_EDU_list)
 
+        assert "".join(tmp_EDU_list).replace(" ", "") == "".join(merged_EDU_list).replace(" ", "")
